@@ -23,7 +23,7 @@ import java.util.List;
  * 博客：http://www.jianshu.com/users/78f0e5f4a403/latest_articles
  * github：https://github.com/MartinBZDQSM
  * <p>
- * 该类修改自 PathView的SvgUtils,去除了属性动画
+ * 该类修改自 PathView的SvgUtils 链接：https://github.com/geftimov/android-pathview
  */
 public class PathLayer {
     /**
@@ -41,7 +41,7 @@ public class PathLayer {
     private SVG mSvg;
 
     /**
-     * Init the SVGUtils with a paint for coloring.
+     * Init the SVGUtils with a paint1 for coloring.
      */
     public PathLayer() {
     }
@@ -64,7 +64,7 @@ public class PathLayer {
     }
 
     /**
-     * Render the svg to canvas and catch all the paths while rendering.
+     * 渲染svg到canvas上，把path回调回来
      *
      * @param width  - the width to scale down the view to,
      * @param height - the height to scale down the view to,
@@ -100,7 +100,7 @@ public class PathLayer {
     }
 
     /**
-     * Rescale the canvas with specific width and height.
+     * 按实际比例进行缩放
      *
      * @param width       The width of the canvas.
      * @param height      The height of the canvas.
@@ -123,6 +123,7 @@ public class PathLayer {
         mSvg.renderToCanvas(canvas);
     }
 
+
     /**
      * Path with bounds for scalling , length and paint.
      */
@@ -143,7 +144,7 @@ public class PathLayer {
          */
         final Path path;
         /**
-         * The paint to be drawn later.
+         * The length of the path.
          */
         float length;
         /**
@@ -166,8 +167,10 @@ public class PathLayer {
          */
         SvgPath(Path path) {
             this.path = path;
+
             measure = new PathMeasure(path, false);
             this.length = measure.getLength();
+
             REGION.setPath(path, MAX_CLIP);
             bounds = REGION.getBounds();
         }
@@ -210,5 +213,9 @@ public class PathLayer {
          * Called when an animation step happens.
          */
         void onAnimationStep();
+    }
+
+    public List<SvgPath> getPaths() {
+        return mPaths;
     }
 }
