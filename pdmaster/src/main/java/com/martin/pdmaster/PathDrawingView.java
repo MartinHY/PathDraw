@@ -70,8 +70,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
      */
     private float progress = 0f;
 
-    private int totalLenth;
-
     private Bitmap mTempBitmap;
     private Canvas mTempCanvas;
 
@@ -91,7 +89,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 path1Id = a.getResourceId(R.styleable.PathDrawingView_path1, 0);
                 pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 pathPaint.setColor(defaultPathColor);
-                pathPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                pathPaint.setStyle(Paint.Style.FILL);
                 pathPaint.setStrokeWidth(5);
             }
         } finally {
@@ -122,9 +120,9 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             }
             mTempCanvas.restore();
             canvas.drawBitmap(mTempBitmap, 0, 0, null);
-            if (paintLayer != null) {
-                canvas.drawBitmap(paintLayer, 0, 0, null);
-            }
+//            if (paintLayer != null) {
+//                canvas.drawBitmap(paintLayer, 0, 0, null);
+//            }
         }
     }
 
@@ -173,7 +171,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
         final int count = mPaths.size();
         for (int i = 0; i < count; i++) {
             PathLayer.SvgPath svgPath = mPaths.get(i);
-            totalLenth += svgPath.getLength();
             svgPath.path.reset();
             svgPath.measure.getSegment(0.0f, svgPath.length * 0, svgPath.path, true);
             // Required only for Android 4.4 and earlier
@@ -207,7 +204,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
         /**
          * Duration of the animation.
          */
-        private int duration = 1000;
+        private int duration = 10000;
 
         private final List<Long> durations = new ArrayList<>();
 
@@ -243,6 +240,9 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          * The animator that can animate paths sequentially
          */
         private AnimatorSet animatorSet = new AnimatorSet();
+        private int index = 0;
+
+        private float totalLenth;
 
         /**
          * Default constructor.
@@ -257,12 +257,16 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             for (PathLayer.SvgPath path : paths) {
                 path.setAnimationStepListener(pathView);
                 ObjectAnimator animation = ObjectAnimator.ofFloat(path, "length", 0.0f, path.getLength());
-                long animationDuration = (long) ((path.getLength() * 1.0f / pathView.totalLenth) * duration);
-                durations.add(animationDuration);
-                Log.i("PathDrawingView", "animationDuration  :" + animationDuration);
-                animation.setDuration(animationDuration);
-                animation.addListener(pathViewAnimatorListener);
+                totalLenth = totalLenth + path.getLength();
                 animators.add(animation);
+            }
+            Log.i("PathDrawingView", "duration  :" + duration);
+            for (int i = 0; i < paths.size(); i++) {
+                long animationDuration = (long) (paths.get(i).getLength() * duration / totalLenth);
+                Animator animator = animators.get(i);
+                animator.setStartDelay(delay);
+                animator.setDuration(animationDuration);
+                animator.addListener(pathViewAnimatorListener);
             }
             animatorSet.addListener(pathViewAnimatorListener);
         }
@@ -328,9 +332,19 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          */
         public void start() {
             resetAllPaths();
-            animatorSet.cancel();
-            animatorSet.playSequentially(animators);
-            animatorSet.start();
+            for (Animator animator : animators) {
+                animator.cancel();
+            }
+            index = 0;
+            startAnimatorByIndex();
+        }
+
+        public void startAnimatorByIndex() {
+            if (index >= paths.size()) {
+                return;
+            }
+            Animator animator = animators.get(index);
+            animator.start();
         }
 
         /**
@@ -369,14 +383,22 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
 
             @Override
             public void onAnimationStart(Animator animation) {
-                if (listenerStart != null)
+                if (index == paths.size() - 1 && listenerStart != null)
                     listenerStart.onAnimationStart();
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (animationEnd != null)
-                    animationEnd.onAnimationEnd();
+                if (index >= paths.size()) {
+                    if (animationEnd != null)
+                        animationEnd.onAnimationEnd();
+                } else {
+                    if (index != paths.size() - 1) {
+                        index++;
+                        startAnimatorByIndex();
+                    }
+
+                }
             }
 
             @Override
