@@ -3,7 +3,6 @@ package com.martin.pdmaster;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -13,7 +12,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
@@ -74,7 +72,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
     private Canvas mTempCanvas;
 
     public PathDrawingView(Context context) {
-        super(context, null);
+        this(context, null);
     }
 
     public PathDrawingView(Context context, AttributeSet attrs) {
@@ -88,9 +86,14 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             if (a != null) {
                 path1Id = a.getResourceId(R.styleable.PathDrawingView_path1, 0);
                 pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                pathPaint.setAntiAlias(true);
+                pathPaint.setDither(true);
+                pathPaint.setStrokeJoin(Paint.Join.ROUND);
+                pathPaint.setStrokeCap(Paint.Cap.ROUND);
                 pathPaint.setColor(defaultPathColor);
                 pathPaint.setStyle(Paint.Style.FILL);
                 pathPaint.setStrokeWidth(5);
+
             }
         } finally {
             if (a != null) {
@@ -107,17 +110,19 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             mTempBitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
             mTempCanvas = new Canvas(mTempBitmap);
         }
+        final int count = mPaths.size();
+        for (int i = 0; i < count; i++) {
+            final PathLayer.SvgPath svgPath = mPaths.get(i);
+            final Path path = svgPath.path;
+            canvas.drawPath(path, pathPaint);
+        }
 
         mTempBitmap.eraseColor(0);
         synchronized (mSvgLock) {
             mTempCanvas.save();
             mTempCanvas.translate(getPaddingLeft(), getPaddingTop());
-            final int count = mPaths.size();
-            for (int i = 0; i < count; i++) {
-                final PathLayer.SvgPath svgPath = mPaths.get(i);
-                final Path path = svgPath.path;
-                mTempCanvas.drawPath(path, pathPaint);
-            }
+
+
             mTempCanvas.restore();
             canvas.drawBitmap(mTempBitmap, 0, 0, null);
 //            if (paintLayer != null) {
@@ -231,7 +236,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
         /**
          * Animation listener.
          */
-        private AnimatorSetBuilder.PathViewAnimatorListener pathViewAnimatorListener;
+        private PathViewAnimatorListener pathViewAnimatorListener;
         /**
          * The list of paths to be animated.
          */

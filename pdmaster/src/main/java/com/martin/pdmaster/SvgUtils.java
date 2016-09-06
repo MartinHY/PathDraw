@@ -19,31 +19,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 作者：MartinBZDQSM on 2016/8/28 0028.
- * 博客：http://www.jianshu.com/users/78f0e5f4a403/latest_articles
- * github：https://github.com/MartinBZDQSM
- * <p>
- * 该类修改自 PathView的SvgUtils 链接：https://github.com/geftimov/android-pathview
+ * Util class to init and get paths from svg.
  */
-public class PathLayer {
+public class SvgUtils {
     /**
      * It is for logging purposes.
      */
-    private static final String LOG_TAG = "PathLayer";
+    private static final String LOG_TAG = "SVGUtils";
     /**
-     * 一张svg可能会有多条path路径
+     * All the paths with their attributes from the svg.
      */
     private final List<SvgPath> mPaths = new ArrayList<>();
-
+    /**
+     * The paint provided from the view.
+     */
+    private final Paint mSourcePaint;
     /**
      * The init svg.
      */
     private SVG mSvg;
 
     /**
-     * Init the SVGUtils with a paint1 for coloring.
+     * Init the SVGUtils with a paint for coloring.
+     *
+     * @param sourcePaint - the paint for the coloring.
      */
-    public PathLayer() {
+    public SvgUtils(final Paint sourcePaint) {
+        mSourcePaint = sourcePaint;
     }
 
     /**
@@ -53,7 +55,7 @@ public class PathLayer {
      * @param svgResource int resource id of the svg.
      */
     public void load(Context context, int svgResource) {
-        if (mSvg != null)
+        if (mSvg != null) 
             return;
         try {
             mSvg = SVG.getFromResource(context, svgResource);
@@ -64,13 +66,26 @@ public class PathLayer {
     }
 
     /**
-     * 渲染svg到canvas上，把path回调回来
+     * Draw the svg to the canvas.
+     *
+     * @param canvas The canvas to be drawn.
+     * @param width  The width of the canvas.
+     * @param height The height of the canvas.
+     */
+    public void drawSvgAfter(final Canvas canvas, final int width, final int height) {
+        final float strokeWidth = mSourcePaint.getStrokeWidth();
+        rescaleCanvas(width, height, strokeWidth, canvas);
+    }
+
+    /**
+     * Render the svg to canvas and catch all the paths while rendering.
      *
      * @param width  - the width to scale down the view to,
      * @param height - the height to scale down the view to,
      * @return All the paths from the svg.
      */
-    public List<SvgPath> getPathsForViewport(final int width, final int height, final float strokeWidth) {
+    public List<SvgPath> getPathsForViewport(final int width, final int height) {
+        final float strokeWidth = mSourcePaint.getStrokeWidth();
         Canvas canvas = new Canvas() {
             private final Matrix mMatrix = new Matrix();
 
@@ -87,10 +102,14 @@ public class PathLayer {
             @Override
             public void drawPath(Path path, Paint paint) {
                 Path dst = new Path();
+
                 //noinspection deprecation
                 getMatrix(mMatrix);
                 path.transform(mMatrix, dst);
-                mPaths.add(new SvgPath(dst));
+                paint.setAntiAlias(true);
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(strokeWidth);
+                mPaths.add(new SvgPath(dst, paint));
             }
         };
 
@@ -100,7 +119,7 @@ public class PathLayer {
     }
 
     /**
-     * 按实际比例进行缩放
+     * Rescale the canvas with specific width and height.
      *
      * @param width       The width of the canvas.
      * @param height      The height of the canvas.
@@ -108,13 +127,13 @@ public class PathLayer {
      * @param canvas      The canvas to be drawn.
      */
     private void rescaleCanvas(int width, int height, float strokeWidth, Canvas canvas) {
-        if (mSvg == null)
+        if (mSvg == null) 
             return;
         final RectF viewBox = mSvg.getDocumentViewBox();
 
         final float scale = Math.min(width
-                        / (viewBox.width()),
-                height / (viewBox.height()));
+                        / (viewBox.width() + strokeWidth),
+                height / (viewBox.height() + strokeWidth));
 
         canvas.translate((width - viewBox.width() * scale) / 2.0f,
                 (height - viewBox.height() * scale) / 2.0f);
@@ -122,7 +141,6 @@ public class PathLayer {
 
         mSvg.renderToCanvas(canvas);
     }
-
 
     /**
      * Path with bounds for scalling , length and paint.
@@ -144,6 +162,10 @@ public class PathLayer {
          */
         final Path path;
         /**
+         * The paint to be drawn later.
+         */
+        final Paint paint;
+        /**
          * The length of the path.
          */
         float length;
@@ -163,10 +185,12 @@ public class PathLayer {
         /**
          * Constructor to add the path and the paint.
          *
-         * @param path The path that comes from the rendered svg.
+         * @param path  The path that comes from the rendered svg.
+         * @param paint The result paint.
          */
-        SvgPath(Path path) {
+        SvgPath(Path path, Paint paint) {
             this.path = path;
+            this.paint = paint;
 
             measure = new PathMeasure(path, false);
             this.length = measure.getLength();
@@ -213,9 +237,5 @@ public class PathLayer {
          * Called when an animation step happens.
          */
         void onAnimationStep();
-    }
-
-    public List<SvgPath> getPaths() {
-        return mPaths;
     }
 }
