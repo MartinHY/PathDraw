@@ -131,7 +131,7 @@ public class PathLayer {
 
 
     /**
-     * Path with bounds for scalling , length and paint.
+     * Path with bounds for scalling , length and mypaint.
      */
     public static class SvgPath {
 
@@ -172,7 +172,7 @@ public class PathLayer {
         float[] point = new float[2];
 
         /**
-         * Constructor to add the path and the paint.
+         * Constructor to add the path and the mypaint.
          *
          * @param path The path that comes from the rendered svg.
          */

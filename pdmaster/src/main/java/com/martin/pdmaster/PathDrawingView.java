@@ -77,6 +77,8 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 pathId = a.getResourceId(R.styleable.PathDrawingView_path1, 0);
                 drawLayerId = a.getResourceId(R.styleable.PathDrawingView_drawer, 0);
                 pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                pathPaint.setStyle(Paint.Style.FILL);
+                pathPaint.setColor(Color.GRAY);
 
                 drawerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 drawerPaint.setStyle(Paint.Style.FILL);
@@ -94,26 +96,17 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         int sc = canvas.save(Canvas.ALL_SAVE_FLAG);
-        if (drawLayerId == 0) {
-            for (Path path : pathLayer.mDrawer) {
-                //如果不采用图片模式，也依旧需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
-//                canvas.drawPath(path, drawerPaint);
-            }
-        }
         synchronized (mSvgLock) {
-            int count =mPaths.size();
-            for (int i=0;i<count;i++){
-
-            }
-            for (PathLayer.SvgPath svgPath : mPaths) {
-                final Path path = svgPath.path;
-                pathPaint.reset();
-                pathPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-                pathPaint.setColor(Color.RED);
-//                pathPaint.setXfermode(xfermode);
+            int count = mPaths.size();
+            for (int i = 0; i < count; i++) {
                 int pc = canvas.save(Canvas.ALL_SAVE_FLAG);
-                canvas.clipPath(path, Region.Op.INTERSECT);
-                canvas.drawPath(path, pathPaint);
+                //需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
+                Path path = pathLayer.mDrawer.get(i);
+                canvas.clipPath(path, Region.Op.REPLACE);
+//                canvas.drawPath(path, drawerPaint);
+                PathLayer.SvgPath svgPath = mPaths.get(i);
+//                pathPaint.setXfermode(xfermode);
+                canvas.drawPath(svgPath.path, pathPaint);
                 canvas.restoreToCount(pc);
             }
         }
@@ -148,7 +141,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                     Resources resources = getContext().getResources();
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inScaled = false;//获取真实宽高的Paintlayer
-                    paintLayer = BitmapFactory.decodeResource(resources, R.drawable.paint1, options);
+                    paintLayer = BitmapFactory.decodeResource(resources, R.drawable.mypaint, options);
                     drawLayer = BitmapFactory.decodeResource(resources, drawLayerId, options);
                     synchronized (mSvgLock) {//同步锁
                         width = w - getPaddingLeft() - getPaddingRight();
