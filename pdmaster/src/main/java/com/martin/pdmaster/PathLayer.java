@@ -22,7 +22,7 @@ import java.util.List;
  * 作者：MartinBZDQSM on 2016/8/28 0028.
  * 博客：http://www.jianshu.com/users/78f0e5f4a403/latest_articles
  * github：https://github.com/MartinBZDQSM
- * <p>
+ * <p/>
  * 该类修改自 PathView的SvgUtils 链接：https://github.com/geftimov/android-pathview
  */
 public class PathLayer {
@@ -34,6 +34,8 @@ public class PathLayer {
      * 一张svg可能会有多条path路径
      */
     private final List<SvgPath> mPaths = new ArrayList<>();
+
+    public final List<Path> mDrawer = new ArrayList<>();
 
     /**
      * The init svg.
@@ -87,10 +89,14 @@ public class PathLayer {
             @Override
             public void drawPath(Path path, Paint paint) {
                 Path dst = new Path();
-                //noinspection deprecation
                 getMatrix(mMatrix);
                 path.transform(mMatrix, dst);
                 mPaths.add(new SvgPath(dst));
+
+                Path dst2 = new Path();
+                getMatrix(mMatrix);
+                path.transform(mMatrix, dst2);
+                mDrawer.add(dst2);
             }
         };
 
@@ -143,6 +149,7 @@ public class PathLayer {
          * The path itself.
          */
         final Path path;
+
         /**
          * The length of the path.
          */
@@ -160,6 +167,10 @@ public class PathLayer {
          */
         final PathMeasure measure;
 
+        boolean isMeasure = false;
+
+        float[] point = new float[2];
+
         /**
          * Constructor to add the path and the paint.
          *
@@ -167,10 +178,8 @@ public class PathLayer {
          */
         SvgPath(Path path) {
             this.path = path;
-
             measure = new PathMeasure(path, false);
             this.length = measure.getLength();
-
             REGION.setPath(path, MAX_CLIP);
             bounds = REGION.getBounds();
         }
@@ -191,9 +200,9 @@ public class PathLayer {
          */
         public void setLength(float length) {
             path.reset();
-            measure.getSegment(0.0f, length, path, false);
+            measure.getSegment(0.0f, length, path, true);
+            measure.getPosTan(length, point, null);
             path.rLineTo(0.0f, 0.0f);
-
             if (animationStepListener != null) {
                 animationStepListener.onAnimationStep();
             }

@@ -1,7 +1,6 @@
 package com.martin.pdmaster;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
@@ -12,8 +11,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Region;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -36,40 +37,29 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
     private int height;
 
     private Bitmap drawLayer;//需要最后显示的图层，绘制在底部
+    private int drawLayerId;
+    private Paint drawerPaint;
     private float nibPrecent = 0.2069f;//笔尖在paintLayer中高的比例
+    private PointF nibPointf;
 
     private Bitmap paintLayer;//画笔的图层
-
-    private PorterDuffXfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_OUT);
-
+    private PorterDuffXfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
     private Paint pathPaint;
-
-    private int path1Id;
-
+    private int pathId;
     private PathLayer pathLayer = new PathLayer();
-
     private List<PathLayer.SvgPath> mPaths = new ArrayList<>();
-
     private static final int defaultPathColor = Color.BLACK;//默认遮挡层的颜色
-
     private int pathColor;
 
     private Thread mLoader;
-
     private final Object mSvgLock = new Object();
+    public static boolean isDrawing = false;
 
 
     /**
      * 去除了并行动画，采用顺序动画
      */
     private AnimatorSetBuilder animatorSetBuilder;
-    /**
-     * 绘制进度
-     */
-    private float progress = 0f;
-
-    private Bitmap mTempBitmap;
-    private Canvas mTempCanvas;
 
     public PathDrawingView(Context context) {
         this(context, null);
@@ -84,16 +74,13 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PathDrawingView);
         try {
             if (a != null) {
-                path1Id = a.getResourceId(R.styleable.PathDrawingView_path1, 0);
+                pathId = a.getResourceId(R.styleable.PathDrawingView_path1, 0);
+                drawLayerId = a.getResourceId(R.styleable.PathDrawingView_drawer, 0);
                 pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                pathPaint.setAntiAlias(true);
-                pathPaint.setDither(true);
-                pathPaint.setStrokeJoin(Paint.Join.ROUND);
-                pathPaint.setStrokeCap(Paint.Cap.ROUND);
-                pathPaint.setColor(defaultPathColor);
-                pathPaint.setStyle(Paint.Style.FILL);
-                pathPaint.setStrokeWidth(5);
 
+                drawerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                drawerPaint.setStyle(Paint.Style.FILL);
+                drawerPaint.setColor(Color.RED);
             }
         } finally {
             if (a != null) {
@@ -106,28 +93,36 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mTempBitmap == null || (mTempBitmap.getWidth() != canvas.getWidth() || mTempBitmap.getHeight() != canvas.getHeight())) {
-            mTempBitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
-            mTempCanvas = new Canvas(mTempBitmap);
+        int sc = canvas.save(Canvas.ALL_SAVE_FLAG);
+        if (drawLayerId == 0) {
+            for (Path path : pathLayer.mDrawer) {
+                //如果不采用图片模式，也依旧需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
+//                canvas.drawPath(path, drawerPaint);
+            }
         }
-        final int count = mPaths.size();
-        for (int i = 0; i < count; i++) {
-            final PathLayer.SvgPath svgPath = mPaths.get(i);
-            final Path path = svgPath.path;
-            canvas.drawPath(path, pathPaint);
-        }
-
-        mTempBitmap.eraseColor(0);
         synchronized (mSvgLock) {
-            mTempCanvas.save();
-            mTempCanvas.translate(getPaddingLeft(), getPaddingTop());
+            int count =mPaths.size();
+            for (int i=0;i<count;i++){
 
-
-            mTempCanvas.restore();
-            canvas.drawBitmap(mTempBitmap, 0, 0, null);
-//            if (paintLayer != null) {
-//                canvas.drawBitmap(paintLayer, 0, 0, null);
-//            }
+            }
+            for (PathLayer.SvgPath svgPath : mPaths) {
+                final Path path = svgPath.path;
+                pathPaint.reset();
+                pathPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                pathPaint.setColor(Color.RED);
+//                pathPaint.setXfermode(xfermode);
+                int pc = canvas.save(Canvas.ALL_SAVE_FLAG);
+                canvas.clipPath(path, Region.Op.INTERSECT);
+                canvas.drawPath(path, pathPaint);
+                canvas.restoreToCount(pc);
+            }
+        }
+        canvas.restoreToCount(sc);
+        for (PathLayer.SvgPath svgPath : mPaths) {
+            if (isDrawing && svgPath.isMeasure) {//过滤初始为0的点
+                Log.i("hyn", "isDrawing  :" + isDrawing);
+                canvas.drawBitmap(paintLayer, svgPath.point[0] - nibPointf.x, svgPath.point[1] - nibPointf.x, null);
+            }
         }
     }
 
@@ -145,41 +140,29 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             } catch (InterruptedException e) {
             }
         }
-        if (path1Id != 0) {
+        if (pathId != 0) {
             mLoader = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    pathLayer.load(getContext(), path1Id);
+                    pathLayer.load(getContext(), pathId);
                     Resources resources = getContext().getResources();
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inScaled = false;//获取真实宽高的Paintlayer
                     paintLayer = BitmapFactory.decodeResource(resources, R.drawable.paint1, options);
+                    drawLayer = BitmapFactory.decodeResource(resources, drawLayerId, options);
                     synchronized (mSvgLock) {//同步锁
                         width = w - getPaddingLeft() - getPaddingRight();
                         height = h - getPaddingTop() - getPaddingBottom();
-
                         //需要测量path
                         mPaths = pathLayer.getPathsForViewport(width, height, 5);
-
-//                        PathDrawingView.this.postInvalidate();
+                        //画笔 的笔尖位置
+                        float nibX = 0;
+                        float nibY = paintLayer.getHeight() * nibPrecent;
+                        nibPointf = new PointF(nibX, nibY);
                     }
                 }
             }, "SVG Loader");
             mLoader.start();
-        }
-    }
-
-    /**
-     * This refreshes the paths before draw and resize.
-     */
-    private void updatePathsPhaseLocked() {
-        final int count = mPaths.size();
-        for (int i = 0; i < count; i++) {
-            PathLayer.SvgPath svgPath = mPaths.get(i);
-            svgPath.path.reset();
-            svgPath.measure.getSegment(0.0f, svgPath.length * 0, svgPath.path, true);
-            // Required only for Android 4.4 and earlier
-            svgPath.path.rLineTo(0.0f, 0.0f);
         }
     }
 
@@ -241,12 +224,8 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          * The list of paths to be animated.
          */
         private List<PathLayer.SvgPath> paths;
-        /**
-         * The animator that can animate paths sequentially
-         */
-        private AnimatorSet animatorSet = new AnimatorSet();
-        private int index = 0;
 
+        private int index = 0;
         private float totalLenth;
 
         /**
@@ -265,7 +244,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 totalLenth = totalLenth + path.getLength();
                 animators.add(animation);
             }
-            Log.i("PathDrawingView", "duration  :" + duration);
             for (int i = 0; i < paths.size(); i++) {
                 long animationDuration = (long) (paths.get(i).getLength() * duration / totalLenth);
                 Animator animator = animators.get(i);
@@ -273,7 +251,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 animator.setDuration(animationDuration);
                 animator.addListener(pathViewAnimatorListener);
             }
-            animatorSet.addListener(pathViewAnimatorListener);
         }
 
         /**
@@ -388,21 +365,27 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
 
             @Override
             public void onAnimationStart(Animator animation) {
-                if (index == paths.size() - 1 && listenerStart != null)
-                    listenerStart.onAnimationStart();
+                if (index < paths.size() - 1) {
+                    paths.get(index).isMeasure = true;
+                    PathDrawingView.isDrawing = true;
+                    if (index == 0 && listenerStart != null)
+                        listenerStart.onAnimationStart();
+                }
+
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (index >= paths.size()) {
+                if (index >= paths.size() - 1) {
+                    PathDrawingView.isDrawing = false;
                     if (animationEnd != null)
                         animationEnd.onAnimationEnd();
                 } else {
-                    if (index != paths.size() - 1) {
+                    if (index < paths.size() - 1) {
+                        paths.get(index).isMeasure = false;
                         index++;
                         startAnimatorByIndex();
                     }
-
                 }
             }
 
