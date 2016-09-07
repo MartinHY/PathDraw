@@ -15,6 +15,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
 
@@ -34,24 +35,35 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
     private int width;
     private int height;
 
-    private Bitmap drawLayer;//需要最后显示的图层，绘制在底部
-    private int drawLayerId;
+    //    private Bitmap drawLayer;//需要最后显示的图层，绘制在底部
+//    private int drawLayerId;
     private Paint drawerPaint;
     private float nibPrecent = 0.2069f;//笔尖在paintLayer中高的比例
     private PointF nibPointf;
 
     private Bitmap paintLayer;//画笔的图层
+
+    //为什么会使用SRC_OUT，请看我的博客
     private PorterDuffXfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);
     private Paint pathPaint;
     private int pathId;
     private PathLayer pathLayer = new PathLayer();
     private List<PathLayer.SvgPath> mPaths = new ArrayList<>();
-    private static final int defaultPathColor = Color.BLACK;//默认遮挡层的颜色
-    private int pathColor;
 
     private Thread mLoader;
     private final Object mSvgLock = new Object();
     public static boolean isDrawing = false;
+
+    private boolean isDrawPaint;
+
+    private int defaultColor = Color.BLACK;
+    private int paintColor;//这两个 目前当做一体的，因为在完整fill的情况下，我暂时无法渲染颜色上去
+
+    private boolean isFill = true;
+
+    private boolean isFillAfter = false;
+
+    public static boolean isDrawingFinished = false;
 
     /**
      * 去除了并行动画，采用顺序动画
@@ -71,15 +83,28 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PathDrawingView);
         try {
             if (a != null) {
-                pathId = a.getResourceId(R.styleable.PathDrawingView_path1, 0);
-                drawLayerId = a.getResourceId(R.styleable.PathDrawingView_drawer, 0);
+                pathId = a.getResourceId(R.styleable.PathDrawingView_path, 0);
+//                drawLayerId = a.getResourceId(R.styleable.PathDrawingView_drawer, 0);
+                isDrawPaint = a.getBoolean(R.styleable.PathDrawingView_draw_paint, true);
+                isFillAfter = a.getBoolean(R.styleable.PathDrawingView_fill_after, false);
+                paintColor = a.getColor(R.styleable.PathDrawingView_paint_color, 0);
+
+                Log.i(TAG, "paintColor :" + paintColor);
+                if (paintColor == 0) {
+                    isFill = true;
+                    paintColor = defaultColor;
+                } else {
+                    isFill = false;
+                }
                 pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                pathPaint.setStyle(Paint.Style.FILL);
-                pathPaint.setColor(Color.GRAY);
-                pathPaint.setXfermode(xfermode);
+                pathPaint.setStyle(Paint.Style.STROKE);//与这里没有毛关系了
+                pathPaint.setColor(paintColor);
+                if (isFill) {
+                    pathPaint.setXfermode(xfermode);
+                }
 
                 drawerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                drawerPaint.setStyle(Paint.Style.FILL);
+                drawerPaint.setStyle(Paint.Style.STROKE);
                 drawerPaint.setColor(Color.TRANSPARENT);
             }
         } finally {
@@ -98,21 +123,28 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             int count = mPaths.size();
             for (int i = 0; i < count; i++) {
                 int pc = canvas.save(Canvas.ALL_SAVE_FLAG);
-                //需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
-                Path path = pathLayer.mDrawer.get(i);
-                canvas.clipPath(path);
                 PathLayer.SvgPath svgPath = mPaths.get(i);
-                if (isDrawing && svgPath.isMeasure) {
-                    canvas.drawPath(path, drawerPaint);
+                if (isFill) {
+                    //需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
+                    Path path = pathLayer.mDrawer.get(i);
+                    canvas.clipPath(path);
+                    if (isDrawing && svgPath.isMeasure) {
+                        canvas.drawPath(path, drawerPaint);
+                    }
                 }
                 canvas.drawPath(svgPath.path, pathPaint);
                 canvas.restoreToCount(pc);
             }
         }
         canvas.restoreToCount(sc);
-        for (PathLayer.SvgPath svgPath : mPaths) {
-            if (isDrawing && svgPath.isMeasure) {
-                canvas.drawBitmap(paintLayer, svgPath.point[0] - nibPointf.x, svgPath.point[1] - nibPointf.y, null);
+        if (isDrawingFinished && isFillAfter)
+            pathLayer.drawSvgAfter(canvas, width, height);
+
+        if (isDrawPaint) {
+            for (PathLayer.SvgPath svgPath : mPaths) {
+                if (isDrawing && svgPath.isMeasure) {
+                    canvas.drawBitmap(paintLayer, svgPath.point[0] - nibPointf.x, svgPath.point[1] - nibPointf.y, null);
+                }
             }
         }
     }
@@ -140,12 +172,14 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inScaled = false;//获取真实宽高的Paintlayer
                     paintLayer = BitmapFactory.decodeResource(resources, R.drawable.mypaint, options);
-                    drawLayer = BitmapFactory.decodeResource(resources, drawLayerId, options);
+
+
+//                    drawLayer = BitmapFactory.decodeResource(resources, drawLayerId, options);
                     synchronized (mSvgLock) {//同步锁
                         width = w - getPaddingLeft() - getPaddingRight();
                         height = h - getPaddingTop() - getPaddingBottom();
                         //需要测量path
-                        mPaths = pathLayer.getPathsForViewport(width, height, 5);
+                        mPaths = pathLayer.getPathsForViewport(width, height);
                         //画笔 的笔尖位置
                         float nibX = 0;
                         float nibY = paintLayer.getHeight() * nibPrecent;
@@ -183,7 +217,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
         /**
          * Duration of the animation.
          */
-        private int duration = 10000;
+        private int duration;
 
         private final List<Long> durations = new ArrayList<>();
 
@@ -234,13 +268,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 ObjectAnimator animation = ObjectAnimator.ofFloat(path, "length", 0.0f, path.getLength());
                 totalLenth = totalLenth + path.getLength();
                 animators.add(animation);
-            }
-            for (int i = 0; i < paths.size(); i++) {
-                long animationDuration = (long) (paths.get(i).getLength() * duration / totalLenth);
-                Animator animator = animators.get(i);
-                animator.setStartDelay(delay);
-                animator.setDuration(animationDuration);
-                animator.addListener(pathViewAnimatorListener);
             }
         }
 
@@ -304,6 +331,15 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          * Starts the animation.
          */
         public void start() {
+
+            for (int i = 0; i < paths.size(); i++) {
+                long animationDuration = (long) (paths.get(i).getLength() * duration / totalLenth);
+                Animator animator = animators.get(i);
+                animator.setStartDelay(delay);
+                animator.setDuration(animationDuration);
+                animator.addListener(pathViewAnimatorListener);
+            }
+
             resetAllPaths();
             for (Animator animator : animators) {
                 animator.cancel();
@@ -359,6 +395,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 if (index < paths.size() - 1) {
                     paths.get(index).isMeasure = true;
                     PathDrawingView.isDrawing = true;
+                    PathDrawingView.isDrawingFinished = false;
                     if (index == 0 && listenerStart != null)
                         listenerStart.onAnimationStart();
                 }
@@ -369,8 +406,10 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             public void onAnimationEnd(Animator animation) {
                 if (index >= paths.size() - 1) {
                     PathDrawingView.isDrawing = false;
-                    if (animationEnd != null)
+                    PathDrawingView.isDrawingFinished = true;
+                    if (animationEnd != null) {
                         animationEnd.onAnimationEnd();
+                    }
                 } else {
                     if (index < paths.size() - 1) {
                         paths.get(index).isMeasure = false;

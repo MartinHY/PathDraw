@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="PathDrawingView">
-        <attr name="path1" format="reference"></attr>
-        <attr name="drawer" format="reference"></attr>
-    </declare-styleable>
-
-    <declare-styleable name="PathView">
-        <attr name="pathColor" format="color|reference" />
-        <attr name="pathWidth" format="dimension|reference" />
-        <attr name="svg" format="reference" />
-        <attr name="fill" format="boolean" />
-        <attr name="fillColor" format="color|reference" />
-        <attr name="naturalColors" format="boolean" />
+        <attr name="path" format="reference"></attr>
+        <attr name="draw_paint" format="boolean"></attr>
+        <attr name="paint_color" format="color"></attr>
+        <attr name="fill_after" format="boolean"></attr>
     </declare-styleable>
 
 </resources>

@@ -72,7 +72,7 @@ public class PathLayer {
      * @param height - the height to scale down the view to,
      * @return All the paths from the svg.
      */
-    public List<SvgPath> getPathsForViewport(final int width, final int height, final float strokeWidth) {
+    public List<SvgPath> getPathsForViewport(final int width, final int height) {
         Canvas canvas = new Canvas() {
             private final Matrix mMatrix = new Matrix();
 
@@ -100,9 +100,20 @@ public class PathLayer {
             }
         };
 
-        rescaleCanvas(width, height, strokeWidth, canvas);
+        rescaleCanvas(width, height, canvas);
 
         return mPaths;
+    }
+
+    /**
+     * Draw the svg to the canvas.
+     *
+     * @param canvas The canvas to be drawn.
+     * @param width  The width of the canvas.
+     * @param height The height of the canvas.
+     */
+    public void drawSvgAfter(final Canvas canvas, final int width, final int height) {
+        rescaleCanvas(width, height, canvas);
     }
 
     /**
@@ -110,10 +121,9 @@ public class PathLayer {
      *
      * @param width       The width of the canvas.
      * @param height      The height of the canvas.
-     * @param strokeWidth Width of the path to add to scaling.
      * @param canvas      The canvas to be drawn.
      */
-    private void rescaleCanvas(int width, int height, float strokeWidth, Canvas canvas) {
+    private void rescaleCanvas(int width, int height, Canvas canvas) {
         if (mSvg == null)
             return;
         final RectF viewBox = mSvg.getDocumentViewBox();
