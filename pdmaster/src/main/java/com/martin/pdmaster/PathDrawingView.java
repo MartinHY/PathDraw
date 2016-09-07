@@ -14,9 +14,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Region;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
 
@@ -43,7 +41,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
     private PointF nibPointf;
 
     private Bitmap paintLayer;//画笔的图层
-    private PorterDuffXfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
+    private PorterDuffXfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);
     private Paint pathPaint;
     private int pathId;
     private PathLayer pathLayer = new PathLayer();
@@ -54,7 +52,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
     private Thread mLoader;
     private final Object mSvgLock = new Object();
     public static boolean isDrawing = false;
-
 
     /**
      * 去除了并行动画，采用顺序动画
@@ -79,10 +76,11 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 pathPaint.setStyle(Paint.Style.FILL);
                 pathPaint.setColor(Color.GRAY);
+                pathPaint.setXfermode(xfermode);
 
                 drawerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 drawerPaint.setStyle(Paint.Style.FILL);
-                drawerPaint.setColor(Color.RED);
+                drawerPaint.setColor(Color.TRANSPARENT);
             }
         } finally {
             if (a != null) {
@@ -102,19 +100,19 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                 int pc = canvas.save(Canvas.ALL_SAVE_FLAG);
                 //需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
                 Path path = pathLayer.mDrawer.get(i);
-                canvas.clipPath(path, Region.Op.REPLACE);
-//                canvas.drawPath(path, drawerPaint);
+                canvas.clipPath(path);
                 PathLayer.SvgPath svgPath = mPaths.get(i);
-//                pathPaint.setXfermode(xfermode);
+                if (isDrawing && svgPath.isMeasure) {
+                    canvas.drawPath(path, drawerPaint);
+                }
                 canvas.drawPath(svgPath.path, pathPaint);
                 canvas.restoreToCount(pc);
             }
         }
         canvas.restoreToCount(sc);
         for (PathLayer.SvgPath svgPath : mPaths) {
-            if (isDrawing && svgPath.isMeasure) {//过滤初始为0的点
-                Log.i("hyn", "isDrawing  :" + isDrawing);
-                canvas.drawBitmap(paintLayer, svgPath.point[0] - nibPointf.x, svgPath.point[1] - nibPointf.x, null);
+            if (isDrawing && svgPath.isMeasure) {
+                canvas.drawBitmap(paintLayer, svgPath.point[0] - nibPointf.x, svgPath.point[1] - nibPointf.y, null);
             }
         }
     }
