@@ -25,6 +25,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
 ### 1.NORMAL
 
 ![ironman](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/ironman.gif)
+add the code in your xml:
  ```
      <com.martin.pdmaster.PathDrawingView
         android:id="@+id/pathdrawing"
@@ -36,6 +37,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
 ### 2.FILL
  
 ![nancy](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/nancy.gif)
+add the code in your xml:
  ```
     <com.martin.pdmaster.PathDrawingView
         android:id="@+id/pathdrawing"
@@ -50,6 +52,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
 ### 3.AFTER FILL
  
 ![afterfill](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/afterfill.gif)
+add the code in your xml:
  ```
     <com.martin.pdmaster.PathDrawingView
         android:id="@+id/pathdrawing"
