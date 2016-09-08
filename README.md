@@ -10,7 +10,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
 
   ![woman](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/woman.gif)
 
-###sttr:
+## sttr:
 ```
     <declare-styleable name="PathDrawingView">
         <attr name="path" format="reference"></attr>
@@ -20,9 +20,9 @@ I removed the parallel animation and modified the fill animation .it will be lik
         <attr name="fill_after" format="boolean"></attr>
     </declare-styleable>
 ```
-###Three modes
+## Three modes
 
-####1.NORMAL
+### 1.NORMAL
 
 ![ironman](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/ironman.gif)
  ```
@@ -33,7 +33,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:draw_paint="true"
         app:path="@raw/ironman"></com.martin.pdmaster.PathDrawingView>
  ```
- ####2.FILL
+ ### 2.FILL
  
 ![nancy](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/nancy.gif)
  ```
@@ -47,7 +47,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:paint_color="@color/colorPrimary"
         app:path="@raw/nancypath3"></com.martin.pdmaster.PathDrawingView>
  ```
- ####3.AFTER FILL
+ ### 3.AFTER FILL
  
 ![afterfill](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/afterfill.gif)
  ```
