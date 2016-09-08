@@ -67,6 +67,11 @@ add the code in your xml:
         app:path="@raw/monitor"></com.martin.pdmaster.PathDrawingView>
  ```
  
+## There is only sequential animation in this library
+```
+ pathDrawingView.getSequentialPathAnimator().delay(200).duration(5000).start();
+```
+ 
 ## **ADD THE LIBRARY **
  
 Add it in your root build.gradle at the end of repositories:
