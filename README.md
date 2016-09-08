@@ -61,6 +61,21 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:path="@raw/monitor"></com.martin.pdmaster.PathDrawingView>
  ```
  
+ ## ADD THE LIBRARY 
+Add it in your root build.gradle at the end of repositories:
+
+	allprojects {
+		repositories {
+			...
+			maven { url "https://jitpack.io" }
+		}
+	}
+Step 2. Add the dependency
+
+	dependencies {
+	      compile 'com.github.MartinBZDQSM:PathDraw:1.0'
+	}
+ 
 ##[BLOG]()
 
 ##**License**
