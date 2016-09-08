@@ -10,14 +10,30 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.martin.pathdraw.MainActivity">
 
-    <com.martin.pdmaster.PathDrawingView
-        android:id="@+id/pathdrawing"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:draw_paint="true"
-        app:fill_after="false"
-        app:filling="true"
-        app:paint_color="@color/colorPrimary"
-        app:path="@raw/nancypath3"></com.martin.pdmaster.PathDrawingView>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Normal"
+        android:id="@+id/button"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="91dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Filling"
+        android:id="@+id/button2"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FaterFill"
+        android:id="@+id/button3"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="74dp" />
 </RelativeLayout>

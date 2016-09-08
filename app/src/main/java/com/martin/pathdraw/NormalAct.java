@@ -6,18 +6,18 @@ import android.view.View;
 
 import com.martin.pdmaster.PathDrawingView;
 
-public class AfterFillAct extends AppCompatActivity {
+public class NormalAct extends AppCompatActivity {
     private PathDrawingView pathDrawingView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_after_fill);
+        setContentView(R.layout.activity_normal);
         pathDrawingView = (PathDrawingView) findViewById(R.id.pathdrawing);
         pathDrawingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pathDrawingView.getSequentialPathAnimator().delay(200).duration(5000).start();
+                pathDrawingView.getSequentialPathAnimator().delay(200).duration(8000).start();
             }
         });
     }

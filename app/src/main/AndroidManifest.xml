@@ -16,7 +16,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".FillAct" />
-        <activity android:name=".AfterFillAct"></activity>
+        <activity android:name=".AfterFillAct" />
+        <activity android:name=".NormalAct"></activity>
     </application>
 
 </manifest>

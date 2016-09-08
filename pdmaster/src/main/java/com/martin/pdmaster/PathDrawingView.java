@@ -381,11 +381,11 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             public void onAnimationStart(Animator animation) {
                 if (index < paths.size() - 1) {
                     paths.get(index).isMeasure = true;
-                    if (animators.get(index).getDuration() < 100) {//过滤动画事件小于100ms的画笔轨迹
-                        PathDrawingView.isDrawing = false;
-                    } else {
-                        PathDrawingView.isDrawing = true;
-                    }
+//                    if (animators.get(index).getDuration() < 100) {//过滤动画事件小于100ms的画笔轨迹
+//                        PathDrawingView.isDrawing = false;
+//                    } else {
+                    PathDrawingView.isDrawing = true;
+//                    }
                     PathDrawingView.isDrawingFinished = false;
                     if (index == 0 && listenerStart != null)
                         listenerStart.onAnimationStart();
