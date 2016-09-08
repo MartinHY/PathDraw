@@ -88,7 +88,7 @@ Step 2. Add the dependency
 	      compile 'com.github.MartinBZDQSM:PathDraw:1.0'
 	}
  
-##[BLOG]()
+##[BLOG](http://www.jianshu.com/p/75a83ad1ab7e)
 
 ##**License**
 
