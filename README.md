@@ -60,6 +60,11 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:paint_color="#000000"
         app:path="@raw/monitor"></com.martin.pdmaster.PathDrawingView>
  ```
+ 
+##[MYLOG]()
+
+##**License**
+
 ```license
 Copyright [2016] [MartinBZDQSM of copyright owner]
 
