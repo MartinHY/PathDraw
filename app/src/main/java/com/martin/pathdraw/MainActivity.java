@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         pathDrawingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pathDrawingView.getSequentialPathAnimator().delay(200).duration(5000).start();
+                pathDrawingView.getSequentialPathAnimator().delay(200).duration(15000).start();
             }
         });
     }

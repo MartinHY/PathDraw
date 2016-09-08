@@ -16,7 +16,6 @@
         android:layout_height="match_parent"
         app:draw_paint="true"
         app:fill_after="false"
-        app:paint_color="@color/colorPrimary"
-        app:path="@raw/ironman"></com.martin.pdmaster.PathDrawingView>
+        app:path="@raw/nancypath3"></com.martin.pdmaster.PathDrawingView>
 
 </RelativeLayout>

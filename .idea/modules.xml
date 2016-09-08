@@ -3,10 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PathDraw.iml" filepath="$PROJECT_DIR$/PathDraw.iml" />
-      <module fileurl="file://$PROJECT_DIR$/PathDraw.iml" filepath="$PROJECT_DIR$/PathDraw.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/pdmaster/pdmaster.iml" filepath="$PROJECT_DIR$/pdmaster/pdmaster.iml" />
       <module fileurl="file://$PROJECT_DIR$/pdmaster/pdmaster.iml" filepath="$PROJECT_DIR$/pdmaster/pdmaster.iml" />
     </modules>
   </component>

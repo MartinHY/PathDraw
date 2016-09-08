@@ -260,9 +260,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          */
         public AnimatorSetBuilder(final PathDrawingView pathView) {
             paths = pathView.mPaths;
-            if (pathViewAnimatorListener == null) {
-                pathViewAnimatorListener = new PathViewAnimatorListener();
-            }
             for (PathLayer.SvgPath path : paths) {
                 path.setAnimationStepListener(pathView);
                 ObjectAnimator animation = ObjectAnimator.ofFloat(path, "length", 0.0f, path.getLength());
@@ -331,13 +328,15 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          * Starts the animation.
          */
         public void start() {
-
-            for (int i = 0; i < paths.size(); i++) {
-                long animationDuration = (long) (paths.get(i).getLength() * duration / totalLenth);
-                Animator animator = animators.get(i);
-                animator.setStartDelay(delay);
-                animator.setDuration(animationDuration);
-                animator.addListener(pathViewAnimatorListener);
+            if (pathViewAnimatorListener == null) {
+                pathViewAnimatorListener = new PathViewAnimatorListener();
+                for (int i = 0; i < paths.size(); i++) {
+                    long animationDuration = (long) (paths.get(i).getLength() * duration / totalLenth);
+                    Animator animator = animators.get(i);
+                    animator.setStartDelay(delay);
+                    animator.setDuration(animationDuration);
+                    animator.addListener(pathViewAnimatorListener);
+                }
             }
 
             resetAllPaths();
@@ -394,7 +393,11 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             public void onAnimationStart(Animator animation) {
                 if (index < paths.size() - 1) {
                     paths.get(index).isMeasure = true;
-                    PathDrawingView.isDrawing = true;
+                    if (animators.get(index).getDuration() < 100) {//过滤动画事件小于100ms的画笔轨迹，不然闪的很难看
+                        PathDrawingView.isDrawing = false;
+                    } else {
+                        PathDrawingView.isDrawing = true;
+                    }
                     PathDrawingView.isDrawingFinished = false;
                     if (index == 0 && listenerStart != null)
                         listenerStart.onAnimationStart();
