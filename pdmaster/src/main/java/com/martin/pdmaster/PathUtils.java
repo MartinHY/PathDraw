@@ -19,13 +19,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class is base on PathView.class in PathView ,
+ * If you want know more , The link of PathView: https://github.com/geftimov/android-pathview.
+ *
+ * Licence of pathview :
+ *
+ * Copyright 2016 Georgi Eftimov
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
  * 作者：MartinBZDQSM on 2016/8/28 0028.
  * 博客：http://www.jianshu.com/users/78f0e5f4a403/latest_articles
  * github：https://github.com/MartinBZDQSM
  * <p/>
  * 该类修改自 PathView的SvgUtils 链接：https://github.com/geftimov/android-pathview
  */
-public class PathLayer {
+public class PathUtils {
     /**
      * It is for logging purposes.
      */
@@ -45,7 +64,7 @@ public class PathLayer {
     /**
      * Init the SVGUtils with a paint1 for coloring.
      */
-    public PathLayer() {
+    public PathUtils() {
     }
 
     /**

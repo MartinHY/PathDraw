@@ -21,11 +21,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class is base on PathView.class in PathView ,
+ * If you want know more , The link of PathView: https://github.com/geftimov/android-pathview.
+ * <p/>
+ * Licence of pathview :
+ * <p/>
+ * Copyright 2016 Georgi Eftimov
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * <p/>
+ * <p/>
  * 作者：MartinBZDQSM on 2016/8/28 0028.
  * 博客：http://www.jianshu.com/users/78f0e5f4a403/latest_articles
  * github：https://github.com/MartinBZDQSM
  */
-public class PathDrawingView extends View implements PathLayer.AnimationStepListener {
+public class PathDrawingView extends View implements PathUtils.AnimationStepListener {
 
     private static final String TAG = "PathDrawingView";
 
@@ -43,8 +62,8 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
 
     private Paint pathPaint;
     private int pathId;
-    private PathLayer pathLayer = new PathLayer();
-    private List<PathLayer.SvgPath> mPaths = new ArrayList<>();
+    private PathUtils pathLayer = new PathUtils();
+    private List<PathUtils.SvgPath> mPaths = new ArrayList<>();
 
     private Thread mLoader;
     private final Object mSvgLock = new Object();
@@ -111,7 +130,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             int count = mPaths.size();
             for (int i = 0; i < count; i++) {
                 int pc = canvas.save(Canvas.ALL_SAVE_FLAG);
-                PathLayer.SvgPath svgPath = mPaths.get(i);
+                PathUtils.SvgPath svgPath = mPaths.get(i);
                 if (isFill) {
                     //需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
                     Path path = pathLayer.mDrawer.get(i);
@@ -129,7 +148,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             pathLayer.drawSvgAfter(canvas, width, height);
 
         if (isDrawPaint) {
-            for (PathLayer.SvgPath svgPath : mPaths) {
+            for (PathUtils.SvgPath svgPath : mPaths) {
                 if (isDrawing && svgPath.isMeasure) {
                     canvas.drawBitmap(paintLayer, svgPath.point[0] - nibPointf.x, svgPath.point[1] - nibPointf.y, null);
                 }
@@ -236,7 +255,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
         /**
          * The list of paths to be animated.
          */
-        private List<PathLayer.SvgPath> paths;
+        private List<PathUtils.SvgPath> paths;
 
         private int index = 0;
         private float totalLenth;
@@ -248,7 +267,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          */
         public AnimatorSetBuilder(final PathDrawingView pathView) {
             paths = pathView.mPaths;
-            for (PathLayer.SvgPath path : paths) {
+            for (PathUtils.SvgPath path : paths) {
                 path.setAnimationStepListener(pathView);
                 ObjectAnimator animation = ObjectAnimator.ofFloat(path, "length", 0.0f, path.getLength());
                 totalLenth = totalLenth + path.getLength();
@@ -347,7 +366,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
          * Sets the length of all the paths to 0.
          */
         private void resetAllPaths() {
-            for (PathLayer.SvgPath path : paths) {
+            for (PathUtils.SvgPath path : paths) {
                 path.setLength(0);
             }
         }
@@ -381,11 +400,11 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             public void onAnimationStart(Animator animation) {
                 if (index < paths.size() - 1) {
                     paths.get(index).isMeasure = true;
-//                    if (animators.get(index).getDuration() < 100) {//过滤动画事件小于100ms的画笔轨迹
-//                        PathDrawingView.isDrawing = false;
-//                    } else {
-                    PathDrawingView.isDrawing = true;
-//                    }
+                    if (animators.get(index).getDuration() < 50) {//过滤动画事件小于100ms的画笔轨迹
+                        PathDrawingView.isDrawing = false;
+                    } else {
+                        PathDrawingView.isDrawing = true;
+                    }
                     PathDrawingView.isDrawingFinished = false;
                     if (index == 0 && listenerStart != null)
                         listenerStart.onAnimationStart();

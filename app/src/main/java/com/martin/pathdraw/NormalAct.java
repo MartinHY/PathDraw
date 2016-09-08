@@ -17,7 +17,7 @@ public class NormalAct extends AppCompatActivity {
         pathDrawingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pathDrawingView.getSequentialPathAnimator().delay(200).duration(8000).start();
+                pathDrawingView.getSequentialPathAnimator().delay(200).duration(5000).start();
             }
         });
     }
