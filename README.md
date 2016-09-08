@@ -33,7 +33,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:draw_paint="true"
         app:path="@raw/ironman"></com.martin.pdmaster.PathDrawingView>
  ```
- ### 2.FILL
+### 2.FILL
  
 ![nancy](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/nancy.gif)
  ```
@@ -47,7 +47,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:paint_color="@color/colorPrimary"
         app:path="@raw/nancypath3"></com.martin.pdmaster.PathDrawingView>
  ```
- ### 3.AFTER FILL
+### 3.AFTER FILL
  
 ![afterfill](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/afterfill.gif)
  ```
@@ -60,3 +60,18 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:paint_color="#000000"
         app:path="@raw/monitor"></com.martin.pdmaster.PathDrawingView>
  ```
+```license
+Copyright [2016] [MartinBZDQSM of copyright owner]
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
