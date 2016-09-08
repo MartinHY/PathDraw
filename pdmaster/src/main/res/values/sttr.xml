@@ -4,6 +4,7 @@
         <attr name="path" format="reference"></attr>
         <attr name="draw_paint" format="boolean"></attr>
         <attr name="paint_color" format="color"></attr>
+        <attr name="filling" format="boolean"></attr>
         <attr name="fill_after" format="boolean"></attr>
     </declare-styleable>
 

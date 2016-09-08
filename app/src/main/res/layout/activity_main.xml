@@ -16,6 +16,8 @@
         android:layout_height="match_parent"
         app:draw_paint="true"
         app:fill_after="false"
+        app:filling="true"
+        app:paint_color="@color/colorPrimary"
         app:path="@raw/nancypath3"></com.martin.pdmaster.PathDrawingView>
 
 </RelativeLayout>

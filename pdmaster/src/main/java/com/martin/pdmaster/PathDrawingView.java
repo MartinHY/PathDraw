@@ -12,10 +12,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
+import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
 
@@ -43,8 +41,6 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
 
     private Bitmap paintLayer;//画笔的图层
 
-    //为什么会使用SRC_OUT，请看我的博客
-    private PorterDuffXfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);
     private Paint pathPaint;
     private int pathId;
     private PathLayer pathLayer = new PathLayer();
@@ -56,13 +52,13 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
 
     private boolean isDrawPaint;
 
-    private int defaultColor = Color.BLACK;
-    private int paintColor;//这两个 目前当做一体的，因为在完整fill的情况下，我暂时无法渲染颜色上去
+    private int defaultColor = Color.GRAY;
+    private int paintColor;
 
     private boolean isFill = true;
+    private RectF drawRect = new RectF();
 
     private boolean isFillAfter = false;
-
     public static boolean isDrawingFinished = false;
 
     /**
@@ -87,25 +83,17 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
 //                drawLayerId = a.getResourceId(R.styleable.PathDrawingView_drawer, 0);
                 isDrawPaint = a.getBoolean(R.styleable.PathDrawingView_draw_paint, true);
                 isFillAfter = a.getBoolean(R.styleable.PathDrawingView_fill_after, false);
-                paintColor = a.getColor(R.styleable.PathDrawingView_paint_color, 0);
+                isFill = a.getBoolean(R.styleable.PathDrawingView_filling, false);
+                paintColor = a.getColor(R.styleable.PathDrawingView_paint_color, defaultColor);
 
-                Log.i(TAG, "paintColor :" + paintColor);
-                if (paintColor == 0) {
-                    isFill = true;
-                    paintColor = defaultColor;
-                } else {
-                    isFill = false;
-                }
                 pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 pathPaint.setStyle(Paint.Style.STROKE);//与这里没有毛关系了
                 pathPaint.setColor(paintColor);
                 if (isFill) {
-                    pathPaint.setXfermode(xfermode);
+                    drawerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    drawerPaint.setStyle(Paint.Style.FILL);
+                    drawerPaint.setColor(paintColor);
                 }
-
-                drawerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                drawerPaint.setStyle(Paint.Style.STROKE);
-                drawerPaint.setColor(Color.TRANSPARENT);
             }
         } finally {
             if (a != null) {
@@ -128,9 +116,9 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
                     //需要备用一个完整的path路径，来修复pathPaint的Fill造成绘制过度
                     Path path = pathLayer.mDrawer.get(i);
                     canvas.clipPath(path);
-                    if (isDrawing && svgPath.isMeasure) {
-                        canvas.drawPath(path, drawerPaint);
-                    }
+                    //获取svgPath当前矩阵
+                    svgPath.path.computeBounds(drawRect, true);
+                    canvas.drawRect(drawRect, drawerPaint);
                 }
                 canvas.drawPath(svgPath.path, pathPaint);
                 canvas.restoreToCount(pc);
@@ -393,7 +381,7 @@ public class PathDrawingView extends View implements PathLayer.AnimationStepList
             public void onAnimationStart(Animator animation) {
                 if (index < paths.size() - 1) {
                     paths.get(index).isMeasure = true;
-                    if (animators.get(index).getDuration() < 100) {//过滤动画事件小于100ms的画笔轨迹，不然闪的很难看
+                    if (animators.get(index).getDuration() < 100) {//过滤动画事件小于100ms的画笔轨迹
                         PathDrawingView.isDrawing = false;
                     } else {
                         PathDrawingView.isDrawing = true;
