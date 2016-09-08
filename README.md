@@ -61,7 +61,8 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:path="@raw/monitor"></com.martin.pdmaster.PathDrawingView>
  ```
  
- ## ADD THE LIBRARY 
+## **ADD THE LIBRARY **
+ 
 Add it in your root build.gradle at the end of repositories:
 
 	allprojects {
