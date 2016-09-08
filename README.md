@@ -21,7 +21,9 @@ I removed the parallel animation and modified the fill animation .it will be lik
     </declare-styleable>
 ```
 ###Three modes
-####1.normal
+
+####1.NORMAL
+
 ![ironman](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/ironman.gif)
  ```
      <com.martin.pdmaster.PathDrawingView
@@ -31,7 +33,8 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:draw_paint="true"
         app:path="@raw/ironman"></com.martin.pdmaster.PathDrawingView>
  ```
- ####2.fill
+ ####2.FILL
+ 
 ![nancy](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/nancy.gif)
  ```
     <com.martin.pdmaster.PathDrawingView
@@ -44,7 +47,8 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:paint_color="@color/colorPrimary"
         app:path="@raw/nancypath3"></com.martin.pdmaster.PathDrawingView>
  ```
- ####3.afterfill
+ ####3.AFTER FILL
+ 
 ![afterfill](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/afterfill.gif)
  ```
     <com.martin.pdmaster.PathDrawingView
