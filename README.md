@@ -10,7 +10,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
 
   ![woman](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/woman.gif)
 
-## sttr:
+## **sttr:**
 ```
     <declare-styleable name="PathDrawingView">
         <attr name="path" format="reference"></attr>
@@ -20,7 +20,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
         <attr name="fill_after" format="boolean"></attr>
     </declare-styleable>
 ```
-## Three modes
+## **Three modes**
 
 ### 1.NORMAL
 
@@ -61,7 +61,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
         app:path="@raw/monitor"></com.martin.pdmaster.PathDrawingView>
  ```
  
-##[MYLOG]()
+##[BLOG]()
 
 ##**License**
 
