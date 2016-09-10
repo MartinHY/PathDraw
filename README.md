@@ -7,8 +7,7 @@ this library is base on [android-pathview](https://github.com/geftimov/android-p
 
 I removed the parallel animation and modified the fill animation .it will be like that：
 
-
-  ![woman](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/woman.gif)
+  ![woman](https://github.com/MartinBZDQSM/PathDraw/blob/master/resources/woman.gif)
 
 ## **sttr:**
 ```
@@ -24,7 +23,7 @@ I removed the parallel animation and modified the fill animation .it will be lik
 
 ### 1.NORMAL
 
-![ironman](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/ironman.gif)
+![ironman](https://github.com/MartinBZDQSM/PathDraw/blob/master/resources/ironman.gif)
 
 add the code in your xml:
  ```
@@ -37,7 +36,7 @@ add the code in your xml:
  ```
 ### 2.FILL
  
-![nancy](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/nancy.gif)
+![nancy](https://github.com/MartinBZDQSM/PathDraw/blob/master/resources/nancy.gif)
 
 add the code in your xml:
  ```
@@ -53,7 +52,7 @@ add the code in your xml:
  ```
 ### 3.AFTER FILL
  
-![afterfill](https://github.com/MartinBZDQSM/PathDraw/blob/master/app/src/main/res/raw/afterfill.gif)
+![afterfill](https://github.com/MartinBZDQSM/PathDraw/blob/master/resources/afterfill.gif)
 
 add the code in your xml:
  ```
