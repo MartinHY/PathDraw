@@ -84,7 +84,7 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	      compile 'com.github.MartinBZDQSM:PathDraw:1.0'
+	       compile 'com.github.MartinBZDQSM:PathDraw:1.1'
 	}
  
 ##[BLOG](http://www.jianshu.com/p/75a83ad1ab7e)
